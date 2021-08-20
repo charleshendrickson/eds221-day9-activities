@@ -33,11 +33,13 @@ Identify what is causing the problem in the code below (there's only one thing).
 
 ```{r}
 # Example 1: 
+# I closed the parenthesis around (is.character), tolower
+
 mack_creek_lengths <- mack_creek_vertebrates %>% 
   clean_names() %>% 
   select(year:sampledate) %>% 
   filter(section == "CC") %>% 
-  mutate(across(where(is.character, tolower))) %>% 
+  mutate(across(where(is.character), tolower)) %>% 
   drop_na(species) %>% 
   group_by(species) %>% 
   summarize(mean_length_cm = mean(length1, na.rm = TRUE),
@@ -51,14 +53,70 @@ Identify what is causing the problem in the code below (there's only one thing).
 
 ```{r}
 # Example 2:
+# I put color = "purple" inside parenthesis and then took shape = 12 and put it outside the parenthesis 
+
 mack_creek_vertebrates %>% 
   clean_names() %>% 
   filter(species == "ONCL") %>% 
   ggplot(aes(x = length1, y = weight)) +
-         geom_point(aes(shape = 12), color = "purple") +
+         geom_point(color = "purple", shape = 12) +
          theme_minimal() +
          labs(x = "Cutthroat trout length (cm)",
               y = "Weight (g)")
 ```
 
 ## End
+
+
+# First reprex 
+```{r}
+library(reprex)
+
+data_frame <- tribble(
+  ~name, ~weight, ~hair_color,
+  "Magoo", 65, "Tan and white",
+  "Arthur", 60, "Tan and white",
+  "Zennie", 75, "Tri color"
+)
+
+data_frame %>%
+  ggplot(aes(x = name, y = weight)) +
+         geom_point(color = "purple", shape = 12)
+
+# I found out that in geom_point, having aesthetics contain color = "purple" does not work because shape is not a variable in my data frame. 
+  
+```
+# Second reprex 
+```{r}
+library(reprex)
+
+data_frame <- tribble(
+  ~Name, ~Weight, ~Hair_Color,
+  "Magoo", 65, "Tan and White",
+  "Arthur", 60, "Tan and White",
+  "Zennie", 75, "Tri Color"
+)
+
+new_data_frame <- data_frame %>%
+  mutate(across(where(is.character), tolower))
+
+new_data_frame
+# I discovered that my code was not running correctly because I did not put parenthesis around `(is.character)` with `, tolower` inside of the second parenthesis. This makes all of my observation values lowercase. 
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
